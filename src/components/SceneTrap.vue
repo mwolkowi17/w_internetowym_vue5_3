@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,useTemplateRef, nextTick } from 'vue';
 
 defineEmits(['koniec-pulapka','koniec-pulapka-focus']);
 
@@ -11,10 +11,15 @@ const props = defineProps({
     ifButtonOnFocusTrap: Boolean
 })
 
+const trapWidok = useTemplateRef('info-trap')
+
 onMounted(() => {
-  const elementToFocus = document.querySelector(".info-trap")
-  if (elementToFocus&&props.ifButtonOnFocusTrap===true) {
-    elementToFocus.focus();
+  // const elementToFocus = document.querySelector(".info-trap")
+  // if (elementToFocus&&props.ifButtonOnFocusTrap===true) {
+  //   elementToFocus.focus();
+  // }
+  if(props.ifButtonOnFocusTrap===true){
+    trapWidok.value.focus()
   }
 
 })
@@ -30,7 +35,7 @@ function koniecPulapki() {
 </script>
 <template>
   <div class="pulapka1">
-     <div class="info-trap" tabindex="0">
+     <div class="info-trap" ref="info-trap" tabindex="0">
     <h2 class="naglowek">Zasadzka!</h2>
     <h3 class="napis">Cofasz się o dwa pola.</h3>
     </div>

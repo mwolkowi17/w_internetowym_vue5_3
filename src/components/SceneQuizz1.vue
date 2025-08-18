@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, useTemplateRef, nextTick } from 'vue';
 import { Quests } from '../lib/quests-source.js';
 
 defineOptions({
@@ -14,12 +14,16 @@ const props = defineProps({
 
 const ifButtonKoniecQuizzuOnFocus = ref(false)
 
+const pytanieWidok = useTemplateRef('pytanie1')
+const odpowiedzWidok = useTemplateRef('info')
 onMounted(() => {
-  const elementToFocus = document.querySelector(".pytanie1")
-  if (elementToFocus && props.ifButtonOnFocusQuizz1 === true) {
-    elementToFocus.focus();
+  // const elementToFocus = document.querySelector(".pytanie1")
+  // if (elementToFocus && props.ifButtonOnFocusQuizz1 === true) {
+  //   elementToFocus.focus();
+  // }
+  if (props.ifButtonOnFocusQuizz1 === true) {
+    pytanieWidok.value.focus();
   }
-
 })
 
 const emit = defineEmits(['koniec-quizz', 'koniec-quizz-focus',
@@ -97,7 +101,7 @@ function zaznaczenie2() {
   }
 }
 
-function sprawdzOdpowiedz() {
+async function sprawdzOdpowiedz() {
   console.log("Sprawdzam odpowiedź");
   if (czy_odpowiedz_poprawna.value) {
     console.log("Odpowiedź poprawna!!!!");
@@ -109,13 +113,23 @@ function sprawdzOdpowiedz() {
     const sound_dobrze = new Audio(new URL('../assets/Dobra_odp.mp3', import.meta.url).href);
     sound_dobrze.play()
 
-    const buttonVis = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(document.querySelector(".info"))
-      }, 300);
-    })
-    if (ifButtonKoniecQuizzuOnFocus.value === true) {
-      buttonVis.then((res) => { res.focus() })
+    // const buttonVis = new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     resolve(document.querySelector(".info"))
+    //   }, 300);
+    // })
+    // if (ifButtonKoniecQuizzuOnFocus.value === true) {
+    //   buttonVis.then((res) => { res.focus() })
+    // }
+    await nextTick()
+
+    
+    
+    console.log(odpowiedzWidok.value)
+  
+    
+    if(odpowiedzWidok&&ifButtonKoniecQuizzuOnFocus.value===true){
+      odpowiedzWidok.value.focus()
     }
   } else {
     console.log("Odpowiedź zła!!!!");
@@ -128,13 +142,20 @@ function sprawdzOdpowiedz() {
     sound_zle.play();
     emit('odejmij-szanse');
 
-    const buttonVis2 = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(document.querySelector(".info"))
-      }, 300);
-    })
-    if (ifButtonKoniecQuizzuOnFocus.value === true) {
-      buttonVis2.then((res) => { res.focus() })
+    // const buttonVis2 = new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     resolve(document.querySelector(".info"))
+    //   }, 300);
+    // })
+    // if (ifButtonKoniecQuizzuOnFocus.value === true) {
+    //   buttonVis2.then((res) => { res.focus() })
+    // }
+     await nextTick()
+      console.log(odpowiedzWidok.value)
+  
+    
+    if(odpowiedzWidok&&ifButtonKoniecQuizzuOnFocus.value===true){
+      odpowiedzWidok.value.focus()
     }
   }
 }
@@ -147,19 +168,19 @@ const pytanieToDisplay = (miejsce) => {
   let textToDisplayPytanie
   if (miejsce === 1) {
     textToDisplayPytanie = "<span>" + quizz_assets_data.pokaz_zadanie_2(miejsce).tresc + "</span>" + "<img class='klodka2' src=" + klodka1image + ">"
-     + "<span>oznacza połączenie:</span>"
+      + "<span>oznacza połączenie:</span>"
   }
   else if (miejsce === 7) {
     textToDisplayPytanie = "<span>" + quizz_assets_data.pokaz_zadanie_2(miejsce).tresc + "</span>" + "<img class='buzka2' src=" + buzka1image + ">"
-    +"<span>wyraża:</span>"
+      + "<span>wyraża:</span>"
   }
   else if (miejsce === 10) {
     textToDisplayPytanie = "<span>" + quizz_assets_data.pokaz_zadanie_2(miejsce).tresc + "</span>" + "<img class='malpa2' src=" + malpa1image + ">"
-    +"<span>używa się w adresie:</span>"
+      + "<span>używa się w adresie:</span>"
   }
   else if (miejsce === 12) {
     textToDisplayPytanie = "<span>" + quizz_assets_data.pokaz_zadanie_2(miejsce).tresc + "</span>" + "<img class='malpa3' src=" + malpa1image + " aria-label='małpa'>"
-    +"<span>oznacza:</span>"
+      + "<span>oznacza:</span>"
   }
   else {
     textToDisplayPytanie = "<span>" + quizz_assets_data.pokaz_zadanie_2(miejsce).tresc + "</span>"
@@ -173,7 +194,7 @@ const pytanieToDisplay = (miejsce) => {
     role="img" alt="tło" aria-label="pytanie">
     <h1 class="sr-only">Quizz</h1>
   </div>
-  <div class="pytanie1" v-html="pytanieToDisplay(props.miejsceNaPlanszy)" tabindex="0"></div>
+  <div class="pytanie1" ref="pytanie1" v-html="pytanieToDisplay(props.miejsceNaPlanszy)" tabindex="0"></div>
 
   <!-- <ul class="lista-odpowiedzi" role="presentation"> -->
   <ul class="lista-odpowiedzi" role="list">
@@ -216,7 +237,7 @@ const pytanieToDisplay = (miejsce) => {
     @keydown.enter="ifButtonKoniecQuizzuOnFocus = true; sprawdzOdpowiedz()" role="button" alt="przycisk sprawdź">Sprawdź
     odpowiedź</button>
   <div class="plansza-dobrze" v-if="if_odpowiedz_dobrze">
-    <div class="info" tabindex="0">
+    <div class="info" ref="info" tabindex="0">
       <p class="naglowek-after-quizz naglowek-dobrze">Brawo!</p>
       <p class="napis-odpowiedz napis-dobrze">Prawidłowa odpowiedź.</p>
     </div>
@@ -224,11 +245,12 @@ const pytanieToDisplay = (miejsce) => {
   <button class="button-dalej-dobrze my-button anim1" v-if="if_button_dalej_dobrze" @click="if_odpowiedz_dobrze = false,
     if_button_dalej_dobrze = false,
     $emit('koniec-quizz')" @keydown.enter="
+      $emit('koniec-quizz-focus'),
       if_odpowiedz_dobrze = false,
-      if_button_dalej_dobrze = false,
-      $emit('koniec-quizz-focus')" role="button">Dalej</button>
+      if_button_dalej_dobrze = false
+      " role="button">Dalej</button>
   <div class="plansza-zle" v-if="if_odpowiedz_zle">
-    <div class="info" tabindex="0">
+    <div class="info" ref="info" tabindex="0">
       <p class="naglowek-after-quizz naglowek-zle">Źle!</p>
       <p class="napis-odpowiedz napis-zle">Błędna odpowiedź.</p>
     </div>
@@ -236,9 +258,10 @@ const pytanieToDisplay = (miejsce) => {
   <button class="button-dalej-dobrze my-button anim1" v-if="if_button_dalej_zle" @click="if_odpowiedz_zle = false,
     if_button_dalej_zle = false,
     $emit('koniec-quizz')" @keydown.enter="
+      $emit('koniec-quizz-focus'),
       if_odpowiedz_zle = false,
-      if_button_dalej_zle = false,
-      $emit('koniec-quizz-focus')
+      if_button_dalej_zle = false
+
       " role="button">Dalej</button>
 
 </template>
@@ -342,7 +365,7 @@ const pytanieToDisplay = (miejsce) => {
   position: relative;
   /* top: 2px;
    left: 555px; */
-   margin-right: .2em;
+  margin-right: .2em;
   margin-left: .2em;
   margin-top: -.3em;
   margin-bottom: -.7em;
@@ -352,16 +375,16 @@ const pytanieToDisplay = (miejsce) => {
 .pytanie1:deep(.malpa2) {
   position: relative;
   /* left: 318px; */
-    margin-right: .2em;
+  margin-right: .2em;
   margin-left: .2em;
-margin-bottom: -.4em;
+  margin-bottom: -.4em;
 }
 
 .pytanie1:deep(.malpa3) {
   position: relative;
-      margin-right: .2em;
+  margin-right: .2em;
   margin-left: .2em;
-margin-bottom: -.4em;
+  margin-bottom: -.4em;
 
 }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, useTemplateRef, nextTick } from 'vue';
 import { metodyPomocnicze } from '../lib/metody-pomocnicze';
 import { PawnMaps } from '../lib/pawn-maps';
 import { Traps } from "../lib/traps";
@@ -24,10 +24,18 @@ const ifTrapFocusOn = ref(false)
 const ifRzucKostkaButtonOnFocus = ref(false)
 const ifFocusEmitGlobal = ref(false)
 
+//referencje do el html używane do obsługi focusa
+const button_rzut = useTemplateRef('rzut2')
+const napisRuch = useTemplateRef('ruchGracza2')
+
 onMounted(() => {
-    const elementToFocus = document.querySelector(".rzut2")
-    if (elementToFocus && props.ifButtonOnFocusMain2 === true) {
-        elementToFocus.focus();
+    // const elementToFocus = document.querySelector(".rzut2")
+    // if (elementToFocus && props.ifButtonOnFocusMain2 === true) {
+    //     elementToFocus.focus();
+    // }
+
+    if(props.ifButtonOnFocusMain2===true){
+        button_rzut.value.focus()
     }
 
 })
@@ -47,6 +55,9 @@ const ilosc_szans = ref(4);
 
 //widoczność przycisku Rzuć kostką
 const if_rzuc_kostka = ref(true)
+
+//informacja o ruchu gracza
+const if_ruch_gracza = ref(true)
 
 //widoczność kostki 
 const if_widok_kostki = ref(false);
@@ -107,7 +118,11 @@ const liczba_wpadek = ref(0)
 
 const wyrzuconaWartoscKostki = ref("Kostka - liczba oczek: " + (x + 1));
 
-function kostka_click() {
+async function kostka_click() {
+    if_ruch_gracza.value=true
+    await nextTick()
+
+    napisRuch.value.focus()
 
     if_rzuc_kostka.value = false //  ukryj przycisk rzuć kostką
     //========================================================================================
@@ -273,6 +288,7 @@ function kostka_click() {
 const koniecQuizu = () => {
      if (krok_gracz1_na_planszy.value < 15) {
     if_rzuc_kostka.value = true
+     if_ruch_gracza.value = false
 
     const buttonRzutVis = new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -285,6 +301,7 @@ const koniecQuizu = () => {
 
     if (krok_gracz1_na_planszy.value === 15) {
         if_rzuc_kostka.value = false
+         if_ruch_gracza.value = false
         console.log("plansza win!")
         emit('koniec-etap2')
      
@@ -293,18 +310,36 @@ const koniecQuizu = () => {
 
 const koniecQuizuFocusOn = () => {
      if (krok_gracz1_na_planszy.value < 15) {
-    if_rzuc_kostka.value = true
+    // if_rzuc_kostka.value = true
 
-    const buttonRzutVis = new Promise((resolve, reject) => {
+     napisRuch.value.focus()
         setTimeout(() => {
-            resolve(document.querySelector(".rzut2"))
-        }, 300);
-    })
 
-    buttonRzutVis.then((res) => { res.focus() })
+            if_rzuc_kostka.value = true
+
+        }, 1000)
+
+        setTimeout(() => {
+            //const button_rzut2=useTemplateRef('rzut1')
+            button_rzut.value.focus()
+        }, 2000)
+
+        // setTimeout(() => {
+        //     if_ruch_gracza.value = false
+        // }, 2300) //było 2500 i było ok
+
+
+    // const buttonRzutVis = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve(document.querySelector(".rzut2"))
+    //     }, 300);
+    // })
+
+    // buttonRzutVis.then((res) => { res.focus() })
 }
 if(krok_gracz1_na_planszy.value === 15) {
         if_rzuc_kostka.value = false
+        // if_ruch_gracza.value = false
         console.log("plansza win focus!")  
         ifFocusEmitGlobal.value = true
         emit('koniec-etap2-focus')
@@ -319,6 +354,7 @@ const koniecPulapki = () => {
     console.log(krok_gracz1_na_planszy.value);
     pionek_left.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][0]
     pionek_top.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][1]
+    if_ruch_gracza.value = false
     if_rzuc_kostka.value = true;
 
     // const buttonRzutVis = new Promise((resolve, reject) => {
@@ -338,15 +374,32 @@ const koniecPulapkiFocusOn = () => {
     console.log(krok_gracz1_na_planszy.value);
     pionek_left.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][0]
     pionek_top.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][1]
-    if_rzuc_kostka.value = true;
+    // if_rzuc_kostka.value = true;
 
-    const buttonRzutVis = new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve(document.querySelector(".rzut2"))
-        }, 300);
-    })
+    // const buttonRzutVis = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve(document.querySelector(".rzut2"))
+    //     }, 300);
+    // })
 
-    buttonRzutVis.then((res) => { res.focus() })
+    // buttonRzutVis.then((res) => { res.focus() })
+
+     napisRuch.value.focus()
+    setTimeout(() => {
+
+        if_rzuc_kostka.value = true
+
+    }, 1000)
+
+    setTimeout(() => {
+        //const button_rzut2=useTemplateRef('rzut1')
+        button_rzut.value.focus()
+    }, 2000)
+
+    // setTimeout(() => {
+    //     if_ruch_gracza.value = false
+    // }, 2500)
+
 }
 
 const odejmijSzanse = () => {
@@ -407,7 +460,10 @@ function clickWithMouse() {
     </div>
     <div class="szansa4 szansa_ksztalt1" v-if="if_szansa4" role="img" alt="gwiazdka ikona szansy" aria-label="Szansa 4">
     </div>
-    <button class="rzut2 my-button anim1" v-if="if_rzuc_kostka" @click="clickWithMouse" @keydown.enter="clickWithFocus"
+     <div class="ruch2" ref="ruchGracza2" v-if="if_ruch_gracza" tabindex="0">
+        <p class="ruch-text">Ruch gracza</p>
+    </div>
+    <button class="rzut2 my-button anim1" ref="rzut2" v-if="if_rzuc_kostka" @click="clickWithMouse" @keydown.enter="clickWithFocus"
         role="button">Rzuć kostką</button>
     <div class="kostka1" :class="{
         'kostka1image1': isSet1,
@@ -545,6 +601,34 @@ function clickWithMouse() {
 
 .kostka1image6 {
     background-image: url("../assets/kostka_6oczek.png");
+}
+
+.ruch2 {
+    color: rgb(29, 56, 80);
+    font-size: 40px;
+    font-style: bold;
+    font-weight: 700;
+    font-family: "Proxima Nova", sans-serif;
+    /*background-image: url("../assets/rzut_przycisk.png");*/
+    background-size: 333px 86px;
+    background-repeat: no-repeat;
+    top: 560px;
+    left: 1502px;
+    height: 86px;
+    width: 333px;
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+}
+
+.ruch2:focus {
+    outline: 5px solid #9a009e;
+}
+
+.ruch-text {
+    position: absolute;
+    margin-top: .5em;
+    margin-left: 1.35em;
 }
 
 .rzut2 {

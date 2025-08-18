@@ -1,17 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, useTemplateRef } from 'vue';
 defineEmits(['jeszcze-raz','jeszcze-raz-focus', 'koniec-gry']);
 
 const props = defineProps({
  ifButtonOnFocusSceneLose: Boolean
 });
 
-onMounted(() => {
-    const elementToFocus = document.querySelector(".info-end2")
-    if (elementToFocus&&props.ifButtonOnFocusSceneLose===true) {
-        elementToFocus.focus();
-    }
+const infoEnd=useTemplateRef('info-end2')
 
+onMounted(() => {
+    // const elementToFocus = document.querySelector(".info-end2")
+    // if (elementToFocus&&props.ifButtonOnFocusSceneLose===true) {
+    //     elementToFocus.focus();
+    // }
+    infoEnd.value.focus()
 })
 
 const przegrana_sound = new Audio(new URL('../assets/przegrana_gra.mp3', import.meta.url).href);
@@ -20,7 +22,7 @@ przegrana_sound.play();
 
 <template>
     <div class="plansza-lose">
-        <div class="info-end2" tabindex="0">
+        <div class="info-end2" ref="info-end2" tabindex="0">
         <h2 class="naglowek">Niestety przegrałeś.</h2>
         <h2 class="napis">Chcesz spróbować jeszcze raz?</h2>
         </div>

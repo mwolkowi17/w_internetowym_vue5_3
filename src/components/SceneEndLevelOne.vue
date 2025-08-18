@@ -1,15 +1,18 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps({
  ifButtonOnFocus: Boolean
 });
 
+const infoWin = useTemplateRef('info-win1')
+
 onMounted(() => {
-    const elementToFocus = document.querySelector(".info-win1")
-    if (elementToFocus&&props.ifButtonOnFocus===true) {
-        elementToFocus.focus();
-    }
+    // const elementToFocus = document.querySelector(".info-win1")
+    // if (elementToFocus&&props.ifButtonOnFocus===true) {
+    //     elementToFocus.focus();
+    // }
+    infoWin.value.focus()
 })
 
 defineEmits(['gram-dalej','gram-dalej-focus', 'koniec-gry', 'koniec-gry-focus']);
@@ -20,7 +23,7 @@ fanfary.play();
 
 <template>
     <div class="plansza-win-level-one">
-        <div class="info-win1" tabindex="0">
+        <div class="info-win1" ref="info-win1" tabindex="0">
         <h1 class="naglowek">Brawo!</h1>
         <p class="napis">Udało Ci się ukończyć <b>Poziom 1,</b></p>
         <p class="napis-2">chcesz grać dalej?</p>

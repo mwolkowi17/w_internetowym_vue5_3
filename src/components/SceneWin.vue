@@ -1,5 +1,5 @@
 <script setup>
-import { ref,onMounted } from 'vue';
+import { ref,onMounted, useTemplateRef } from 'vue';
 
 defineOptions({
     inheritAttrs: false
@@ -9,13 +9,16 @@ const props = defineProps({
  ifButtonOnFocusSceneWin: Boolean
 });
 
+const infoWin = useTemplateRef('info-win2')
+
 defineEmits(['jeszcze-raz','jeszcze-raz-focus', 'koniec-gry', 'koniec-gry-focus']);
 
 onMounted(() => {
-    const elementToFocus = document.querySelector(".info-win2")
-    if (elementToFocus&&props.ifButtonOnFocusSceneWin) {
-        elementToFocus.focus();
-    }
+    // const elementToFocus = document.querySelector(".info-win2")
+    // if (elementToFocus&&props.ifButtonOnFocusSceneWin) {
+    //     elementToFocus.focus();
+    // }
+    infoWin.value.focus()
 })
 
 const fanfary = new Audio(new URL('../assets/fanfary.mp3', import.meta.url).href);
@@ -24,7 +27,7 @@ fanfary.play();
 
 <template>
     <div class="plansza-win">
-         <div class="info-win2" tabindex="0">
+         <div class="info-win2" ref="info-win2" tabindex="0">
        <h1 class="naglowek">GRATULACJE!</h1>
        <h2 class="napis">Udało ci się ukończyć grę.</h2>
        </div>

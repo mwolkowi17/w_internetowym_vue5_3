@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,  useTemplateRef, nextTick  } from 'vue';
 import { Quests2 } from '../lib/quests-source2.js';
 
 defineOptions({
@@ -14,12 +14,17 @@ const props = defineProps({
 
 const ifButtonKoniecQuizzuOnFocus = ref(false)
 
-onMounted(() => {
-    const elementToFocus = document.querySelector(".pytanie1")
-    if (elementToFocus && props.ifButtonOnFocusQuizz2) {
-        elementToFocus.focus();
-    }
+const pytanieWidok = useTemplateRef('pytanie1')
+const odpowiedzWidok = useTemplateRef('info')
 
+onMounted(() => {
+    // const elementToFocus = document.querySelector(".pytanie1")
+    // if (elementToFocus && props.ifButtonOnFocusQuizz2) {
+    //     elementToFocus.focus();
+    // }
+   if (props.ifButtonOnFocusQuizz2 === true) {
+    pytanieWidok.value.focus();
+  }
 })
 
 const emit = defineEmits(['koniec-quizz', 'koniec-quizz-focus',
@@ -122,7 +127,7 @@ function zaznaczenie3() {
     }
 }
 
-function sprawdzOdpowiedz() {
+ async function sprawdzOdpowiedz() {
     console.log("Sprawdzam odpowiedź");
     if (czy_odpowiedz_poprawna.value) {
         console.log("Odpowiedź poprawna!!!!");
@@ -135,14 +140,25 @@ function sprawdzOdpowiedz() {
         const sound_dobrze = new Audio(new URL('../assets/Dobra_odp.mp3', import.meta.url).href);
         sound_dobrze.play();
 
-        const buttonVis = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(document.querySelector(".info"))
-            }, 300);
-        })
-        if (ifButtonKoniecQuizzuOnFocus.value === true) {
-            buttonVis.then((res) => { res.focus() })
-        }
+        // const buttonVis = new Promise((resolve, reject) => {
+        //     setTimeout(() => {
+        //         resolve(document.querySelector(".info"))
+        //     }, 300);
+        // })
+        // if (ifButtonKoniecQuizzuOnFocus.value === true) {
+        //     buttonVis.then((res) => { res.focus() })
+        // }
+
+        await nextTick()
+
+    
+    
+    console.log(odpowiedzWidok.value)
+  
+    
+    if(odpowiedzWidok&&ifButtonKoniecQuizzuOnFocus.value===true){
+      odpowiedzWidok.value.focus()
+    }
 
     } else {
         console.log("Odpowiedź zła!!!!");
@@ -156,14 +172,22 @@ function sprawdzOdpowiedz() {
         sound_zle.play();
         emit('odejmij-szanse');
 
-        const buttonVis2 = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(document.querySelector(".info"))
-            }, 300);
-        })
-        if (ifButtonKoniecQuizzuOnFocus.value === true) {
-            buttonVis2.then((res) => { res.focus() })
-        }
+        // const buttonVis2 = new Promise((resolve, reject) => {
+        //     setTimeout(() => {
+        //         resolve(document.querySelector(".info"))
+        //     }, 300);
+        // })
+        // if (ifButtonKoniecQuizzuOnFocus.value === true) {
+        //     buttonVis2.then((res) => { res.focus() })
+        // }
+
+          await nextTick()
+      console.log(odpowiedzWidok.value)
+  
+    
+    if(odpowiedzWidok&&ifButtonKoniecQuizzuOnFocus.value===true){
+      odpowiedzWidok.value.focus()
+    }
     }
 }
 
@@ -175,7 +199,7 @@ function sprawdzOdpowiedz() {
     </div>
 
     <!-- <div class="planszaQuizz1 " :class="eksp1[9]"></div> -->
-    <h2 class="pytanie1" tabindex="0">{{ quizz_assets_data.pokaz_zadanie_2(props.miejsceNaPlanszy).tresc }}</h2>
+    <div class="pytanie1" ref="pytanie1" tabindex="0">{{ quizz_assets_data.pokaz_zadanie_2(props.miejsceNaPlanszy).tresc }}</div>
     <ul class="lista-odpowiedzi" role="list">
         <li>
             <div class="pojedyncza-odpowiedz" role="checkbox" tabindex="0" :aria-checked="zaznaczenieOdpowiedzi1"
@@ -244,7 +268,7 @@ function sprawdzOdpowiedz() {
         @keydown.enter="ifButtonKoniecQuizzuOnFocus = true; sprawdzOdpowiedz" role="button">Sprawdź
         odpowiedź</button>
     <div class="plansza-dobrze" v-if="if_odpowiedz_dobrze">
-        <div class="info" tabindex="0">
+        <div class="info" ref="info" tabindex="0">
             <p class="naglowek-after-quizz naglowek-dobrze">Brawo!</p>
             <p class="napis-odpowiedz napis-dobrze">Prawidłowa odpowiedź.</p>
         </div>
@@ -254,7 +278,7 @@ function sprawdzOdpowiedz() {
         $emit('koniec-quizz')" @keydown.enter="if_odpowiedz_dobrze = false,
             if_button_dalej_dobrze = false, $emit('koniec-quizz-focus')" role="button">Dalej</button>
     <div class="plansza-zle" v-if="if_odpowiedz_zle">
-         <div class="info" tabindex="0">
+         <div class="info" ref="info" tabindex="0">
         <p class="naglowek-after-quizz naglowek-zle">Źle!</p>
         <p class="napis-odpowiedz napis-zle">Błędna odpowiedź.</p>
         </div>

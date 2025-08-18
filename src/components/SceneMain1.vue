@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, useTemplateRef, nextTick } from 'vue'
 import { metodyPomocnicze } from '../lib/metody-pomocnicze';
 import { PawnMaps } from '../lib/pawn-maps';
 import { Traps } from "../lib/traps";
 import SceneQuizz1 from './SceneQuizz1.vue';
 import SceneTrap from './SceneTrap.vue';
 
-const emit = defineEmits(['koniec-etap1', 'przegrana','koniec-etap1-focus','przegrana-focus'])
+const emit = defineEmits(['koniec-etap1', 'przegrana', 'koniec-etap1-focus', 'przegrana-focus'])
 
 const props = defineProps({
     ifButtonOnFocusMain1: Boolean
@@ -21,17 +21,26 @@ const ifTrapFocusOn = ref(false)
 const ifRzucKostkaButtonOnFocus = ref(false)
 const ifFocusEmitGlobal = ref(false)
 
+//referencje do el html używane do obsługi focusa
+const button_rzut = useTemplateRef('rzut1')
+const napisRuch = useTemplateRef('ruchGracza')
+
 onMounted(() => {
-    const elementToFocus = document.querySelector(".rzut1")
-    if (elementToFocus && props.ifButtonOnFocusMain1 === true) {
-        elementToFocus.focus();
+    // const elementToFocus = document.querySelector(".rzut1")
+    // if (elementToFocus && props.ifButtonOnFocusMain1 === true) {
+    //     elementToFocus.focus();
+    // }
+
+    //nowe podejście bez korzystania asynchroniczności
+    if (props.ifButtonOnFocusMain1 === true) {
+        button_rzut.value.focus()
     }
-    const  ruchGraczaNapis = new Promise((resolve, reject) => {
-     setTimeout(() => {
-       resolve(document.querySelector(".ruch1"))
-     }, 300);
-    })
-   
+    // const ruchGraczaNapis = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve(document.querySelector(".ruch1"))
+    //     }, 300);
+    // })
+
 })
 
 //roboczo tylko dla starej funkcji
@@ -41,7 +50,7 @@ const postac1 = ref("postać")
 const krok_gracz1_na_planszy = ref(0);
 
 //roboczo do edycji pytań
-//const krok_gracz1_na_planszy = ref(12);
+//const krok_gracz1_na_planszy = ref(15);
 
 //zdefinowanie pozycji (mapy wszystkich pozycji) gracza nr 1
 const pozycje_pionka_gracza1 = new PawnMaps().pionek_gracza1;
@@ -50,7 +59,7 @@ const pozycje_pionka_gracza1 = new PawnMaps().pionek_gracza1;
 const ilosc_szans = ref(3);
 
 //widoczność przycisku Rzuć kostką
-const if_rzuc_kostka = ref(true)  
+const if_rzuc_kostka = ref(true)
 
 //informacja o ruchu gracza
 const if_ruch_gracza = ref(true)
@@ -110,7 +119,7 @@ let ruch_lokalny = 0;
 let x;
 
 //instancja obieku odpowiadającego za pułapki
-    const trap = new Traps();
+const trap = new Traps();
 
 // nowa funkcjonalnosc ograniczająca ilośc wpadek - zmienne sterujace - trzeba dodać dodawanie wartosci-liczba wpadek-przy pułapce!!!!
 const liczba_wyrzucona = ref(0)
@@ -118,16 +127,20 @@ const liczba_wpadek = ref(0)
 
 const wyrzuconaWartoscKostki = ref("Kostka - liczba oczek: " + (x + 1));
 
-function kostka_click() {
+async function kostka_click() {
 
     if_ruch_gracza.value = true
+    await nextTick()
+    // if(napisRuch.value){
+    napisRuch.value.focus()
+    //}
     if_rzuc_kostka.value = false //  ukryj przycisk rzuć kostką
-    
 
-   
-    
-      //ruchGraczaNapis.then((res) => { res.focus() })
-   
+
+
+
+    //ruchGraczaNapis.then((res) => { res.focus() })
+
     //========================================================================================
     let i = 0; //  set your counter to 0
     //========================================================================================
@@ -136,22 +149,22 @@ function kostka_click() {
 
     // nowa funkcjonalnosc ograniczająca ilośc wpadek  
     let wartoscWyrzuconaFirst = metodyPomocnicze.rzucaj()
-    console.log("oczka: "+wartoscWyrzuconaFirst)
-    if(liczba_wpadek.value<2){
-    console.log("ilość wpadek: "+liczba_wpadek.value)
-    liczba_wyrzucona.value=wartoscWyrzuconaFirst
+    console.log("oczka: " + wartoscWyrzuconaFirst)
+    if (liczba_wpadek.value < 2) {
+        console.log("ilość wpadek: " + liczba_wpadek.value)
+        liczba_wyrzucona.value = wartoscWyrzuconaFirst
     }
-    if(liczba_wpadek.value>=2&&trap.czy_polapka(krok_gracz1_na_planszy.value+wartoscWyrzuconaFirst+1)=== true){
+    if (liczba_wpadek.value >= 2 && trap.czy_polapka(krok_gracz1_na_planszy.value + wartoscWyrzuconaFirst + 1) === true) {
         console.log("zmieniam")
-        
-        if(wartoscWyrzuconaFirst<5){
-            liczba_wyrzucona.value=wartoscWyrzuconaFirst+1
-        }else{
-            liczba_wyrzucona.value=wartoscWyrzuconaFirst-1
+
+        if (wartoscWyrzuconaFirst < 5) {
+            liczba_wyrzucona.value = wartoscWyrzuconaFirst + 1
+        } else {
+            liczba_wyrzucona.value = wartoscWyrzuconaFirst - 1
         }
-    }else{
-        console.log("ilość wpadek powyżej: "+liczba_wpadek.value)
-    liczba_wyrzucona.value=wartoscWyrzuconaFirst
+    } else {
+        console.log("ilość wpadek powyżej: " + liczba_wpadek.value)
+        liczba_wyrzucona.value = wartoscWyrzuconaFirst
     }
     //========================================koniec tej funcjonalnosci===============================================
 
@@ -248,7 +261,7 @@ function kostka_click() {
         console.log("krok na planszy: " + krok_gracz1_na_planszy.value);
     }
 
-    
+
 
     const pulapka_czy_quizz = () => {
         console.log("sprawdzam czy pułapka albo quizz");
@@ -265,7 +278,7 @@ function kostka_click() {
             if (trap.czy_polapka(krok_gracz1_na_planszy.value) === true) {
                 console.log("wpadka");
                 //dodaje wpadki do licznika wpadek
-                liczba_wpadek.value=liczba_wpadek.value+1
+                liczba_wpadek.value = liczba_wpadek.value + 1
                 //  pokazuje planszę pułapki
                 setTimeout(() => {
                     if_widok_pulapki.value = true;
@@ -284,23 +297,23 @@ function kostka_click() {
 
     const wywolanie_sceny_koncowej = () => {
         console.log("wywołanie planszy wyboru etapu nr 2");
-        if(ifFocusEmitGlobal.value===false){
+        if (ifFocusEmitGlobal.value === false) {
             emit('koniec-etap1')
         }
-        
-        if(ifFocusEmitGlobal.value===true){
-           emit('koniec-etap1-focus')  
+
+        if (ifFocusEmitGlobal.value === true) {
+            emit('koniec-etap1-focus')
         }
-        
+
     };
 
 
 }
 
 const koniecQuizu = () => {
-   if (krok_gracz1_na_planszy.value < 15) {  
-    if_rzuc_kostka.value = true
-    if_ruch_gracza.value=false
+    if (krok_gracz1_na_planszy.value < 15) {
+        if_rzuc_kostka.value = true
+        if_ruch_gracza.value = false
         const buttonRzutVis = new Promise((resolve, reject) => {
             setTimeout(() => {
                 resolve(document.querySelector(".rzut1"))
@@ -310,36 +323,55 @@ const koniecQuizu = () => {
 
     if (krok_gracz1_na_planszy.value === 15) {
         if_rzuc_kostka.value = false
-        if_ruch_gracza.value=false
+        //if_ruch_gracza.value = false
         console.log("plansza win level!")
         emit('koniec-etap1')
-     
+
     }
 }
 
-const koniecQuizuFocusOn=()=>{
-     if (krok_gracz1_na_planszy.value < 15) {
-        if_ruch_gracza.value=false
-        if_rzuc_kostka.value = true
+const koniecQuizuFocusOn = async () => {
+    if (krok_gracz1_na_planszy.value < 15) {
+        //if_ruch_gracza.value=false
+        //if_rzuc_kostka.value = true
 
-        const buttonRzutVis = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(document.querySelector(".rzut1"))
-            }, 300);
-        })
+        napisRuch.value.focus()
+    
+    
+        napisRuch.value.focus()
+        setTimeout(() => {
 
-        buttonRzutVis.then((res) => {
-            res.focus()
-        })
+            if_rzuc_kostka.value = true
+
+        }, 1000)
+
+        setTimeout(() => {
+            //const button_rzut2=useTemplateRef('rzut1')
+            button_rzut.value.focus()
+        }, 1000)
+
+        // setTimeout(() => {
+        //     if_ruch_gracza.value = false
+        // }, 2300) //było 2500 i było ok
+
+        // const buttonRzutVis = new Promise((resolve, reject) => {
+        //     setTimeout(() => {
+        //         resolve(document.querySelector(".rzut1"))
+        //     }, 300);
+        // })
+
+        // buttonRzutVis.then((res) => {
+        //     res.focus()
+        // })
     }
 
     if (krok_gracz1_na_planszy.value === 15) {
         if_rzuc_kostka.value = false
-        if_ruch_gracza.value=false
-        console.log("plansza win level focus!")  
+        //if_ruch_gracza.value = false
+        console.log("plansza win level focus!")
         ifFocusEmitGlobal.value = true
         emit('koniec-etap1-focus')
-        
+
     }
 
 }
@@ -352,7 +384,7 @@ const koniecPulapki = () => {
     console.log(krok_gracz1_na_planszy.value);
     pionek_left.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][0]
     pionek_top.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][1]
-    if_ruch_gracza.value=false
+    if_ruch_gracza.value = false
     if_rzuc_kostka.value = true;
 
     // const buttonRzutVis = new Promise((resolve, reject) => {
@@ -365,24 +397,45 @@ const koniecPulapki = () => {
 
 }
 
-const koniecPulapkiFocusOn=()=>{
-     console.log("emmiter - krok do tyłu");
+ const koniecPulapkiFocusOn = async () => {
+    console.log("emmiter - krok do tyłu");
     console.log(krok_gracz1_na_planszy.value);
     krok_gracz1_na_planszy.value = krok_gracz1_na_planszy.value - 2;
     ruch_lokalny = ruch_lokalny - 2;
     console.log(krok_gracz1_na_planszy.value);
     pionek_left.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][0]
     pionek_top.value = pozycje_pionka_gracza1[krok_gracz1_na_planszy.value - 1][1]
-    if_ruch_gracza.value=false
-    if_rzuc_kostka.value = true;
+    // if_ruch_gracza.value=false
+    // if_rzuc_kostka.value = true;
+    // button_rzut.value.focus()
+    // const buttonRzutVis = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve(document.querySelector(".rzut1"))
+    //     }, 300);
+    // })
 
-    const buttonRzutVis = new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve(document.querySelector(".rzut1"))
-        }, 300);
-    })
+    // buttonRzutVis.then((res) => { res.focus() })
+    napisRuch.value.focus()
+    
+  
+    setTimeout(() => {
 
-    buttonRzutVis.then((res) => { res.focus() })
+        if_rzuc_kostka.value = true
+
+    }, 1000)
+
+    setTimeout(() => {
+        //const button_rzut2=useTemplateRef('rzut1')
+        button_rzut.value.focus()
+       
+        
+    }, 2000)
+
+    // setTimeout(() => {
+    //     if_ruch_gracza.value = false
+    // }, 2500)
+
+
 }
 
 const odejmijSzanse = () => {
@@ -401,34 +454,34 @@ const odejmijSzanse = () => {
         if_szansa1.value = false;
         console.log("przegrałeś!!!");
         if_widok_quizz1.value = false;
-        if(ifFocusEmitGlobal.value===false){
+        if (ifFocusEmitGlobal.value === false) {
             console.log('przegrana z myszki')
-             emit('przegrana');
+            emit('przegrana');
         }
-        if(ifFocusEmitGlobal.value===true){
-             console.log("przegrana z focusa")
-             emit('przegrana-focus');
+        if (ifFocusEmitGlobal.value === true) {
+            console.log("przegrana z focusa")
+            emit('przegrana-focus');
         }
-        
+
     }
 }
 
 function clickWithFocus() {
     ifQuizzFocusOn.value = true
     ifTrapFocusOn.value = true
-    ifFocusEmitGlobal.value=true
+    ifFocusEmitGlobal.value = true
     kostka_click()
 }
 
-function clickWithMouse(){
-    ifFocusEmitGlobal.value=false
+function clickWithMouse() {
+    ifFocusEmitGlobal.value = false
     kostka_click()
 }
 </script>
 <template>
     <h1 class="sr-only">Gra planszowa - poziom 1</h1>
     <div class="tlo2" role="img" aria-label="gra planszowa - poziom1"></div>
-    <div class="ikona-start" role="img" alt="" ></div>
+    <div class="ikona-start" role="img" alt=""></div>
     <div class="trasa" role="img" alt="grafika" aria-label="trasa gry zawierająca 16 pól"></div>
     <div class="ikona-meta" role="img" alt=""></div>
     <div class="pionek1" :style="{ left: pionek_left + 'px', top: pionek_top + 'px' }" role="img" alt="ikona"
@@ -437,11 +490,11 @@ function clickWithMouse(){
     <div class="szansa1 szansa_ksztalt1" v-if="if_szansa1" role="img" alt="ikona" aria-label="Szansa 1"></div>
     <div class="szansa2 szansa_ksztalt1" v-if="if_szansa2" role="img" alt="ikona" aria-label="Szansa 2"></div>
     <div class="szansa3 szansa_ksztalt1" v-if="if_szansa3" role="img" alt="ikona" aria-label="Szansa 3"></div>
-    <div class="ruch1" v-if="if_ruch_gracza" tabindex="0">
-       <p class="ruch-text">Ruch gracza</p>
+    <div class="ruch1" ref="ruchGracza" v-if="if_ruch_gracza" tabindex="0">
+        <p class="ruch-text">Ruch gracza</p>
     </div>
-      <button class="rzut1 my-button anim1" v-if="if_rzuc_kostka" @click="clickWithMouse" @keydown.enter="clickWithFocus"
-        role="button">Rzuć kostką</button>
+    <button ref="rzut1" class="rzut1 my-button anim1" v-if="if_rzuc_kostka" @click="clickWithMouse"
+        @keydown.enter="clickWithFocus" role="button">Rzuć kostką</button>
     <div class="kostka1" :class="{
         'kostka1image1': isSet1,
         'kostka1image2': isSet2,
@@ -450,10 +503,12 @@ function clickWithMouse(){
         'kostka1image5': isSet5,
         'kostka1image6': isSet6
     }" v-if="if_widok_kostki" role="img" alt="ikona widoku kostki" :aria-label=wyrzuconaWartoscKostki></div>
-    <SceneTrap v-if="if_widok_pulapki" @koniec-pulapka="if_widok_pulapki = false, koniecPulapki()" @koniec-pulapka-focus="if_widok_pulapki = false, koniecPulapkiFocusOn()" :ifButtonOnFocusTrap="ifTrapFocusOn" />
+    <SceneTrap v-if="if_widok_pulapki" @koniec-pulapka="if_widok_pulapki = false, koniecPulapki()"
+        @koniec-pulapka-focus="if_widok_pulapki = false, koniecPulapkiFocusOn()" :ifButtonOnFocusTrap="ifTrapFocusOn" />
     <SceneQuizz1 v-if="if_widok_quizz1" @koniec-quizz="if_widok_quizz1 = false, koniecQuizu()"
-        @koniec-quizz-focus="if_widok_quizz1 = false, ifRzucKostkaButtonOnFocus = true, koniecQuizuFocusOn()" @odejmij-szanse="odejmijSzanse" msg="Hej"
-        :miejsceNaPlanszy="krok_gracz1_na_planszy" :ifButtonOnFocusQuizz1="ifQuizzFocusOn" />
+        @koniec-quizz-focus="if_widok_quizz1 = false, ifRzucKostkaButtonOnFocus = true, koniecQuizuFocusOn()"
+        @odejmij-szanse="odejmijSzanse" msg="Hej" :miejsceNaPlanszy="krok_gracz1_na_planszy"
+        :ifButtonOnFocusQuizz1="ifQuizzFocusOn" />
 
 </template>
 <style scoped>
@@ -479,19 +534,19 @@ function clickWithMouse(){
     z-index: 0;
 }
 
-.sr-only{
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
-.trasa{
+.trasa {
     background-image: url("../assets/sama_plansza.png");
     background-size: 1280px 799px;
     background-repeat: no-repeat;
@@ -503,7 +558,7 @@ function clickWithMouse(){
     z-index: 0;
 }
 
-.ikona-meta{
+.ikona-meta {
     background-image: url("../assets/meta_poziom1.png");
     background-size: 267px 288px;
     background-repeat: no-repeat;
@@ -590,7 +645,7 @@ function clickWithMouse(){
     width: 333px;
     position: absolute;
     z-index: 2;
-      /* outline: 4px solid transparent; */
+    /* outline: 4px solid transparent; */
 }
 
 /* .rzut1:hover {
@@ -602,13 +657,13 @@ function clickWithMouse(){
     outline: 5px solid #9a009e;
 }
 
-.ruch1{
-     color: rgb(255, 255, 255);
+.ruch1 {
+    color: rgb(29, 56, 80);
     font-size: 40px;
     font-style: bold;
     font-weight: 700;
     font-family: "Proxima Nova", sans-serif;
-    background-image: url("../assets/rzut_przycisk.png");
+    /*background-image: url("../assets/rzut_przycisk.png");*/
     background-size: 333px 86px;
     background-repeat: no-repeat;
     top: 560px;
@@ -620,11 +675,11 @@ function clickWithMouse(){
     text-align: center;
 }
 
-.ruch1:focus{
+.ruch1:focus {
     outline: 5px solid #9a009e;
 }
 
-.ruch-text{
+.ruch-text {
     position: absolute;
     margin-top: .5em;
     margin-left: 1.35em;
