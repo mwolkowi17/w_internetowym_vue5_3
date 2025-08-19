@@ -8,20 +8,6 @@ const props = defineProps({
 })
 const stageParent = ref(null)
 
-//nieużywana funkcja fullscreen - to obsługuje platforma
-function openFullscreen() {
-  console.log("openFullscreen called");
-
-  const element = stageParent.value;
-  console.log("Element to fullscreen:", element);
-  if (element && element.requestFullscreen) {
-    element.requestFullscreen().catch((error) => {
-      console.log(error.message);
-    });
-  } else {
-    console.log('Fullscreen API not supported or ref not found');
-  }
-}
 </script>
 
 <template>

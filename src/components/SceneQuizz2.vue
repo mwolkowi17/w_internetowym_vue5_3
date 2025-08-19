@@ -199,7 +199,7 @@ function zaznaczenie3() {
     </div>
 
     <!-- <div class="planszaQuizz1 " :class="eksp1[9]"></div> -->
-    <div class="pytanie1" ref="pytanie1" tabindex="0">{{ quizz_assets_data.pokaz_zadanie_2(props.miejsceNaPlanszy).tresc }}</div>
+    <p class="pytanie1" ref="pytanie1" tabindex="0">{{ quizz_assets_data.pokaz_zadanie_2(props.miejsceNaPlanszy).tresc }}</p>
     <ul class="lista-odpowiedzi" role="list">
         <li>
             <div class="pojedyncza-odpowiedz" role="checkbox" tabindex="0" :aria-checked="zaznaczenieOdpowiedzi1"
@@ -364,7 +364,7 @@ function zaznaczenie3() {
     font-family: "Proxima Nova", sans-serif;
     position: absolute;
     white-space: nowrap;
-    top: 297px;
+    top: 290px;
     left: 190px;
     padding: 20px;
 }
